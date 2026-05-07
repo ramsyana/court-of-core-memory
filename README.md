@@ -1,4 +1,4 @@
-# Court of Core Memory: A Formal Agent Memory Architecture
+# Court of Core Memory: A Formal Agent Memory Architecture [DRAFT]
 
 **Author:** Ramsyana  
 **GitHub:** @ramsyana
