@@ -1,9 +1,9 @@
-# COURT_DESIGN.md
+# COURT_DESIGN
 
 This document extends and refines the Court specification in README.md.  
 Where they conflict, COURT_DESIGN.md takes precedence for implementation decisions.
 
-## Court of Core Memory – Hybrid Design (v5)
+## Court of Core Memory – Hybrid Design
 
 The Court is a **deterministic rule engine with narrow, auditable LLM subroutines**.  
 It never asserts epistemic validity that the rules do not mechanically allow.
