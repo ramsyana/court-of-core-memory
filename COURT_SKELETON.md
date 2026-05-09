@@ -307,14 +307,12 @@ class Court:
     ) -> Optional[tuple[NodeState, str]]:
         """
         Step 1 (rule engine): structural candidates via entity-time index.
-        Step 2 (LLM): semantic similarity, only if candidates exist.
+        Step 2 (LLM): conflict likelihood scoring, only if candidates exist.
 
         Confidence bands are read from CourtConfig and must be set via
         empirical calibration before production use (see COURT_DESIGN.md §1).
         Until bands are configured, all structural candidates are flagged
         for human review as Contested.
-
-        Returns (target_state, conflicting_node_id) or None if clean.
         """
         candidates = await self._store.query_entity_time_index(
             primary_entity=node.primary_entity,
@@ -331,9 +329,9 @@ class Court:
             if other is None or other.node_id == node.node_id:
                 continue
 
-            prompt = self._build_semantic_similarity_prompt(node, other)
+            prompt = self._build_conflict_likelihood_prompt(node, other)
             result = await self._wrapper.run(
-                subroutine_name="semantic-similarity",
+                subroutine_name="conflict-likelihood",
                 prompt=prompt,
                 verifier=semantic_similarity_verifier,
                 node_id_affected=node.node_id,
@@ -425,7 +423,7 @@ class Court:
         # Must instruct the LLM to return exactly one NodeKind value on the first line.
         raise NotImplementedError("Implement prompt template")
 
-    def _build_semantic_similarity_prompt(self, a: Node, b: Node) -> str:
+    def _build_conflict_likelihood_prompt(self, a: Node, b: Node) -> str:
         # Must instruct the LLM to return a float [0.0, 1.0] on the first line.
         raise NotImplementedError("Implement prompt template")
 ```

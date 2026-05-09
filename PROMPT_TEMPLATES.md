@@ -38,7 +38,7 @@ All prompts are executed as **single user messages** (no separate system role). 
 
 - If verifier returns `override`, Court keeps the node’s existing `kind` (COURT_SKELETON.md `_assign_node_kind`).
 
-### 1.2 `semantic-similarity`
+### 1.2 `conflict-likelihood`
 
 **Verifier:** `semantic_similarity_verifier` (PROMPT_VERIFICATION_WRAPPER.md §6)
 
@@ -48,8 +48,8 @@ All prompts are executed as **single user messages** (no separate system role). 
 
 **Semantic definition (v0):**
 
-- The score represents **proposition overlap**: how strongly Observation A and B refer to the same underlying claim/proposition.
-- It is **not** a contradiction-likelihood score.
+- The score represents **conflict likelihood under Court use**: how likely Observation A and B should be treated as semantically conflicting given the Court has already found a structural candidate match.
+- It is **not** a generic text similarity score.
 
 **Failure behavior in Court:**
 
@@ -118,10 +118,10 @@ Line 2+: optional rationale
 - This template is designed to be robust to the `node_kind_verifier`, which only checks the first line.
 - Including a few `FiveW1HPlusTwo` fields helps disambiguate Event vs State Fact without requiring multi-turn prompting.
 
-### 2.2 `semantic-similarity` Prompt Template (Proposition Overlap)
+### 2.2 `conflict-likelihood` Prompt Template
 
 ```text
-SYSTEM INSTRUCTIONS (Court Subroutine: semantic-similarity)
+SYSTEM INSTRUCTIONS (Court Subroutine: conflict-likelihood)
 - You are a scoring component used inside a deterministic rule engine.
 - You must output the score on the FIRST LINE ONLY.
 - The FIRST LINE must be a single decimal number parseable as a Python float.
@@ -132,24 +132,24 @@ SYSTEM INSTRUCTIONS (Court Subroutine: semantic-similarity)
 - You may add a brief rationale starting on line 2.
 
 TASK
-Given two observations, estimate PROPOSITION OVERLAP: how strongly they refer to the same underlying claim.
+Given two observations, estimate CONFLICT LIKELIHOOD: how likely they express incompatible claims about the same underlying subject, assuming the Court has already flagged them as structural candidates.
 
-SCORING RUBRIC (Proposition Overlap)
+SCORING RUBRIC (Conflict Likelihood)
 - 1.0:
-  - Essentially the same proposition, even if worded differently.
-  - Same claim about the same entity and same time window.
+  - Direct negation or mutually exclusive claims.
+  - Example shape: "X is true" vs "X is false" for the same entity/time.
 - 0.7–0.9:
-  - Very similar proposition; minor differences in wording or detail.
+  - Strong tension: claims are difficult to reconcile without additional assumptions.
 - 0.4–0.6:
-  - Related topic/entity, but different claims (overlap in subject, not in proposition).
+  - Mild inconsistency or ambiguity: could be compatible, could be conflict.
 - 0.1–0.3:
-  - Weakly related; mostly different propositions.
+  - Likely compatible: different aspects or scopes; low chance of conflict.
 - 0.0:
-  - Completely different propositions.
+  - Clearly compatible or unrelated.
 
 IMPORTANT
-- Focus on proposition overlap, not surface text similarity.
-- When uncertain, choose a conservative (lower) score.
+- Focus on semantic compatibility/incompatibility, not surface text similarity.
+- When uncertain, choose a conservative score near the middle (around 0.5).
 
 INPUT
 Observation A:

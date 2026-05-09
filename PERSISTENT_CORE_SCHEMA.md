@@ -44,7 +44,10 @@ class FiveW1HPlusTwo(BaseModel):
     for Hypothesis nodes. Mandatory field enforcement is the exclusive
     responsibility of the Court's rule engine per NodeKind and state
     (see STATE_MACHINE.md). At minimum, 'what' and 'evidence' are required
-    for Candidate and Certified nodes."""
+    for Candidate and Certified nodes; at least one Node anchor is also required
+    at the Court rule-engine layer (v1 completeness: what + evidence + anchors).
+    Temporal coverage ('when') is strongly preferred but not a baseline schema
+    requirement."""
     who:                Optional[str]       = None
     what:               Optional[str]       = None
     when:               Optional[str]       = None
@@ -78,6 +81,12 @@ class Node(BaseModel):
     abstracted_into:     Optional[str]   = None
     previous_version_id: Optional[str]   = None  # immutable history chaining
     created_at:          datetime        = Field(default_factory=datetime.utcnow)
+
+    # Canonicality note:
+    # - `edges` is the canonical representation of relationships.
+    # - `superseded_by` and `abstracted_into` are optional convenience mirrors for
+    #   the two most common edge types. When present they must match the
+    #   corresponding edge in `edges`.
 
     @field_validator("human_review_required")
     @classmethod

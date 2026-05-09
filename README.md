@@ -230,7 +230,12 @@ The 5W1H+2 scaffold is a completeness checklist used by the Validation Court dur
 | What it means     | Implication       |
 | What aided it     | Resources         |
 
-**Mandatory fields**: Semantic and Temporal. A candidate without these two is rejected or sent back for enrichment.
+**Mandatory fields (v1 Court completeness)**: `Semantic` + `Evidence anchor`.
+In the v1 data model these correspond to:
+- `FiveW1HPlusTwo.what` (Semantic)
+- At least one anchor (`Node.anchors`) and at least one evidence pointer (`FiveW1HPlusTwo.evidence`)
+
+`Temporal` (`FiveW1HPlusTwo.when`) is strongly preferred and is expected to be required by kind-specific rules in a later revision. The Court may still reject candidates with missing Temporal coverage depending on configured policy, but the baseline v1 completeness contract is `what + evidence + anchors`.
 
 **All other fields**: Partial coverage is permitted. Missing dimensions are flagged as "unknown" with a confidence of 0. This ensures partial memories can be promoted without fabricating content to fill gaps, while making their incompleteness explicit and auditable.
 
@@ -288,7 +293,7 @@ The entry state encodes epistemic provenance. A Candidate from Ingestion is grou
 
 The Court runs the following steps on every nominated candidate:
 
-1. **Completeness check**: Verifies that mandatory 5W1H+2 fields (Semantic and Temporal) are present. Rejects or returns for enrichment if not.
+1. **Completeness check**: Verifies that mandatory 5W1H+2 fields (Semantic and Evidence anchor) are present. Rejects or returns for enrichment if not.
 2. **Evidence verification**: Confirms the confidence anchor points to a valid Stage 0 entry. Checks Evidence Type consistency.
 3. **Node Kind confirmation**: Confirms or corrects the Node Kind assigned by the extractor. Adjusts applicable contradiction rules accordingly.
 4. **Contradiction scan**: Searches the Persistent Core for conflicts with existing Certified nodes. Applies the 3-type contradiction protocol, respecting Node Kind constraints, if a conflict is found.
@@ -338,7 +343,7 @@ The Generated bucket is never subject to eviction policy -- its contents flush i
 
 These principles govern the entire architecture and resolve all known structural tensions.
 
-- **Partial promotion is allowed.** A memory candidate does not need all eight dimensions populated. Only Semantic and Temporal are mandatory. Gaps are flagged explicitly.
+- **Partial promotion is allowed.** A memory candidate does not need all eight dimensions populated. Only Semantic and Evidence anchor are mandatory. Gaps are flagged explicitly.
 - **Reflection and abstraction outputs route through Court.** Nothing enters the Persistent Core directly from Reflection. Every proposal is a Court candidate.
 - **Evidence tagging is required.** Every piece of evidence entering Stage 0 carries an Evidence Type tag. Every certified node carries a Validation Basis assigned by Court.
 - **Relevance and Priority are retrieval-time computations.** Neither is stored as a static property. Both are computed on demand from current goals.
@@ -409,6 +414,8 @@ The Court of Core Memory architecture is a closed-loop, formally governed memory
 - **Governance consistency**: One authority (the Court) mediates all state transitions. Reflection proposes. Court decides.
 
 The architecture is ready for implementation. The next meaningful insights will come from concrete lifecycle traces, contradiction resolution walkthroughs, retrieval simulations, and implementation stress tests -- not further top-level design.
+
+**Scope note (design-only repo):** The eight orthogonal graph layers are the intended conceptual model for the Persistent Core. The v1 storage schema in this repository specifies Court-governed `Node` records plus append-only Stage 0 logs and minimal indexes; a concrete persisted representation of the eight projection graphs is deferred to a later implementation-focused revision.
 
 ## License
 
