@@ -1,4 +1,8 @@
-# Court of Core Memory: A Formal Agent Memory Architecture [DRAFT]
+# Court of Core Memory: A Formal Agent Memory Architecture — Design Specification [DRAFT]
+
+> **Status:** Concept & design specification only. No production implementation exists.
+> This repository contains architecture documents, data schemas, and proposed interfaces.
+> Code implementation is planned but not yet begun.
 
 **Author:** Ramsyana  
 **GitHub:** @ramsyana
