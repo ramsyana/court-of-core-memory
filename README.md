@@ -172,6 +172,8 @@ Applied to every Core Node and every edge across all layers.
 
 Note: Confidence represents epistemic certainty -- how sure the system is that the evidence is valid. It does not represent behavioral frequency or pattern stability. Distributional facts such as "the user usually prefers concise answers" are a known limitation of the current confidence model. Behavioral stability as a separate field is deferred to a future version.
 
+Contradiction-scan scores, router weights, retrieval penalties, and traversal weights are not Confidence. They are local decision signals only and must never overwrite a node's Court-certified, Stage-0-anchored Confidence.
+
 **Priority**: Not stored statically. Computed lazily at retrieval time based on the current Goal Core Nodes in the Goal Index. When goals change, Priority values do not need cascading updates -- they are recomputed on demand.
 
 **Abstraction Level**: A vertical hierarchy cutting across all eight content layers: Raw Episode, Synthesis, Principle. This is not a flat layer alongside the eight content dimensions. It is a hierarchical structure within the graph that allows the same fact to exist at different levels of generality.
@@ -202,16 +204,18 @@ Observed-External and Observed-Internal are both grounded but not equally author
 
 ### Validation Basis: Certification Reason
 
-Court-assigned at certification. Describes why the Court accepted the candidate.
+Court-assigned at certification. Describes the authoritative basis on which the Court accepted the candidate.
 
-- **Direct Evidence**: A single strong observed fact with high confidence.
-- **Multi-source Corroboration**: Multiple independent evidence sources converge on the same conclusion.
-- **Statistical Inference**: Probabilistic reasoning over observed patterns.
-- **Reflection Synthesis**: A Reflection-generated abstraction or hypothesis that passed Court scrutiny.
-- **Human Assertion**: Explicit user-provided statement treated as authoritative input.
-- **Temporal Supersession**: Certified because it replaces a previously certified fact with newer evidence.
+The authoritative stored values are:
 
-Evidence Type and Validation Basis are orthogonal. A node can be Observed-External with a Validation Basis of Multi-source Corroboration, or Inferred with a Validation Basis of Reflection Synthesis.
+- **Stage0Anchor**: Certified directly from one or more Stage 0 evidence anchors.
+- **CertifiedAnchor**: Certified from existing Certified nodes plus Court-governed structural checks.
+- **ProposedSynthesis**: Reflection-generated synthesis that remains explicitly marked as synthesis-derived under Court review and certification.
+- **HumanOverride**: Certified or resolved through an explicitly logged privileged human decision.
+
+These are schema-level values and should be used consistently across implementation documents. Richer natural-language explanations may be added in audit logs or UI layers, but they must map back to these canonical values.
+
+Evidence Type and Validation Basis are orthogonal. A node can be Observed-External with a Validation Basis of Stage0Anchor, or Inferred with a Validation Basis of ProposedSynthesis.
 
 ---
 
@@ -306,6 +310,8 @@ The Court runs the following steps on every nominated candidate:
 
 The Current bucket (active task inputs and goal) seeds the initial retrieval query. The retrieval policy then performs policy-guided multi-layer traversal across the eight content dimensions using an AEL-style Thompson-sampling bandit by default, configurable to full agentic reasoning about the current goal.
 
+Optional retrieval-layer components such as an intent-aware router may alter traversal policy and ranking, but they do not change node state, Validation Basis, or certified Confidence.
+
 The Goal Index is used to locate current Goal Core Nodes. Priority is computed lazily at retrieval time based on those goals -- it is not read from stored node properties.
 
 Hybrid scoring combines graph distance, dimension weights, and on-the-fly relevance computation. Derivation Distance attenuation is applied: nodes further from observed evidence are ranked lower. State-based penalties are applied: Contested and Conflicted nodes are penalized or excluded by default.
@@ -324,6 +330,8 @@ Reflection proposes changes in two modes:
 
 - **Novel synthesis** → nominates a **Hypothesis**-state node, routed through Court.
 - **Grounded transformations** (rewires, abstraction promotions, contradiction resolutions) → nominates a **Candidate**-state node, routed through Court.
+
+MAGMA-style segmentation artifacts, retrieval paths, router outputs, and consolidation hints are not anchors by themselves. A Reflection or consolidation output may enter as `Candidate` only when explicitly anchored to Stage 0 evidence or existing Certified nodes; otherwise it must enter as `Hypothesis`.
 
 Reflection may also periodically recompute Derivation Distance estimates and nominate confidence recalibration candidates if materially different from the certified baseline.
 

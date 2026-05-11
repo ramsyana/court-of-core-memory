@@ -30,7 +30,7 @@ from datetime import datetime, timezone
 class VerificationResult:
     status: Literal["pass", "override", "pending-human-review"]
     parsed_output: Any = None
-    confidence: Optional[float] = None
+    confidence: Optional[float] = None   # contradiction-local score when applicable; not node Confidence
     override_reason: str = ""          # always present; empty when status == "pass"
 
 
@@ -206,7 +206,7 @@ def semantic_similarity_verifier(raw_output: str) -> VerificationResult:
     return VerificationResult(
         status="pass",
         parsed_output=score,
-        confidence=score,
+        confidence=score,  # stored for audit of the subroutine, not as node Confidence
     )
 
 

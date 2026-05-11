@@ -50,6 +50,7 @@ All prompts are executed as **single user messages** (no separate system role). 
 
 - The score represents **conflict likelihood under Court use**: how likely Observation A and B should be treated as semantically conflicting given the Court has already found a structural candidate match.
 - It is **not** a generic text similarity score.
+- It is **not** the node's certified Confidence and must never be used as a replacement for Stage-0-anchored epistemic confidence.
 
 **Failure behavior in Court:**
 
@@ -150,6 +151,7 @@ SCORING RUBRIC (Conflict Likelihood)
 IMPORTANT
 - Focus on semantic compatibility/incompatibility, not surface text similarity.
 - When uncertain, choose a conservative score near the middle (around 0.5).
+- The score is a contradiction-local routing signal only.
 
 INPUT
 Observation A:

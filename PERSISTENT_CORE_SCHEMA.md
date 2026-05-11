@@ -26,6 +26,8 @@ class NodeState(str, Enum):
     DEPRECATED  = "Deprecated"
 
 class ValidationBasis(str, Enum):
+    # Canonical stored values for certification basis.
+    # Any human-readable wording in higher-level docs must map to these values.
     STAGE_0_ANCHOR     = "Stage0Anchor"
     CERTIFIED_ANCHOR   = "CertifiedAnchor"
     PROPOSED_SYNTHESIS = "ProposedSynthesis"
@@ -73,7 +75,7 @@ class Node(BaseModel):
     time_window:         Optional[str]   = None
     content:             str
     five_w1h_plus_2:     FiveW1HPlusTwo
-    validation_basis:    ValidationBasis
+    validation_basis:    ValidationBasis   # authoritative schema-level certification basis
     anchors:             List[str]       = Field(default_factory=list)  # Stage0 entry_ids or node_ids
     edges:               List[Edge]      = Field(default_factory=list)  # outgoing edges (canonical)
     human_review_required: bool          = False
@@ -105,7 +107,7 @@ class ObservedInternal(BaseModel):
     full_prompt:             Optional[str]                                   = None  # required for court-subroutine
     raw_output:              Optional[str]                                   = None  # required for court-subroutine
     rule_verification_result: Literal["pass", "override", "pending-human-review"]
-    confidence:              Optional[float]                                 = None
+    confidence:              Optional[float]                                 = None  # contradiction-local subroutine score when present; never node Confidence
     resolver:                Optional[str]                                   = None
     decision:                Optional[Literal["certify", "supersede", "defer"]] = None
     timestamp:               datetime                                        = Field(default_factory=datetime.utcnow)
@@ -118,6 +120,13 @@ class ObservedInternal(BaseModel):
                 raise ValueError("full_prompt is required when source = 'court-subroutine'")
             if self.raw_output is None:
                 raise ValueError("raw_output is required when source = 'court-subroutine'")
+        if self.source == "human-resolution":
+            if self.resolver is None:
+                raise ValueError("resolver is required when source = 'human-resolution'")
+            if self.decision is None:
+                raise ValueError("decision is required when source = 'human-resolution'")
+            if not self.raw_output:
+                raise ValueError("raw_output must contain the human reason when source = 'human-resolution'")
         return self
 ```
 

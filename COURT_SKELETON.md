@@ -178,6 +178,7 @@ class Court:
         node_id: str,
         decision: Literal["certify", "supersede", "defer"],
         resolver: str = "human",
+        reason: str = "",
     ) -> None:
         """
         Privileged human or agent override for Contested or Conflicted nodes.
@@ -200,6 +201,7 @@ class Court:
             node_id=node_id,
             decision=decision,
             resolver=resolver,
+            reason=reason,
         )
 
         if decision == "defer":
@@ -309,7 +311,7 @@ class Court:
         Step 1 (rule engine): structural candidates via entity-time index.
         Step 2 (LLM): conflict likelihood scoring, only if candidates exist.
 
-        Confidence bands are read from CourtConfig and must be set via
+        Contradiction bands are read from CourtConfig and must be set via
         empirical calibration before production use (see COURT_DESIGN.md §1).
         Until bands are configured, all structural candidates are flagged
         for human review as Contested.
@@ -357,6 +359,8 @@ class Court:
         """
         Pure rule engine lookup table.
         ProposedSynthesis nodes (from Reflection) are passed through unchanged.
+        Retrieval hints, segmentation metadata, and consolidation artifacts are
+        never validation anchors by themselves.
         """
         if node.validation_basis == ValidationBasis.PROPOSED_SYNTHESIS:
             return node
